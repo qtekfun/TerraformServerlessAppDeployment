@@ -23,10 +23,16 @@ data "archive_file" "lambda" {
 }
 
 resource "aws_lambda_function" "serverless_app" {
-  function_name = "serverless_app"
-  runtime       = "python3.12"
-  handler       = "lambda_function.lambda_handler"
-  filename      = "app/lambda_function.zip"
-  role          = aws_iam_role.lambda_execution_role.arn
+  function_name    = "serverless_app"
+  runtime          = "python3.12"
+  handler          = "lambda_function.lambda_handler"
+  filename         = "app/lambda_function.zip"
+  role             = aws_iam_role.lambda_execution_role.arn
   source_code_hash = data.archive_file.lambda.output_base64sha256
+
+  environment {
+    variables = {
+      S3_BUCKET_NAME = aws_s3_bucket.app_s3_bucketo.bucket
+    }
+  }
 }
