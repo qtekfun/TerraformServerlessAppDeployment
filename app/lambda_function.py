@@ -1,7 +1,7 @@
 # lambda_function.py
 
 import json
-# import pymysql
+import pymysql
 import os
 
 import logging
