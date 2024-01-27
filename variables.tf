@@ -3,19 +3,3 @@ variable "aws_region" {
   description = "Region for AWS Resources"
   default     = "eu-west-3"
 }
-
-variable "company" {
-  type        = string
-  description = "Company name for resource tagging"
-  default     = "Qtekfun's company"
-}
-
-variable "project" {
-  type        = string
-  description = "Project name for resource tagging"
-}
-
-variable "billing_code" {
-  type        = string
-  description = "Billing code for resource tagging"
-}

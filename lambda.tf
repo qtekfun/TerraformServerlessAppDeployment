@@ -22,32 +22,18 @@ data "archive_file" "lambda" {
   output_path = "lambda_function.zip"
 }
 
-data "archive_file" "pymysql_layer_zip" {
-  type        = "zip"
-  source_dir  = "app/pymysql_layer"
-  output_path = "pymysql_layer.zip"
-}
-
 data "archive_file" "boto3_layer_zip" {
   type        = "zip"
   source_dir  = "app/boto3_layer"
   output_path = "boto3_layer.zip"
 }
 
-resource "aws_lambda_layer_version" "pymysql_layer" {
-  layer_name          = "pymysql_layer"
-  filename            = data.archive_file.pymysql_layer_zip.output_path
-  compatible_runtimes = ["python3.12"]
-
-  source_code_hash = data.archive_file.pymysql_layer_zip.output_base64sha256
-}
-
 resource "aws_lambda_layer_version" "boto3_layer" {
   layer_name          = "boto3_layer"
-  filename            = data.archive_file.pymysql_layer_zip.output_path
+  filename            = data.archive_file.boto3_layer_zip.output_path
   compatible_runtimes = ["python3.12"]
 
-  source_code_hash = data.archive_file.pymysql_layer_zip.output_base64sha256
+  source_code_hash = data.archive_file.boto3_layer_zip.output_base64sha256
 }
 
 resource "aws_lambda_function" "serverless_app" {
@@ -61,15 +47,10 @@ resource "aws_lambda_function" "serverless_app" {
   environment {
     variables = {
       S3_BUCKET_NAME = aws_s3_bucket.app_s3_bucketa.bucket
-      RDS_HOST       = aws_db_instance.my_db_instance.address,
-      RDS_USERNAME   = aws_db_instance.my_db_instance.username,
-      RDS_PASSWORD   = aws_db_instance.my_db_instance.password,
-      RDS_DB_NAME    = aws_db_instance.my_db_instance.db_name,
     }
   }
 
   layers = [
-    aws_lambda_layer_version.pymysql_layer.arn,
     aws_lambda_layer_version.boto3_layer.arn,
   ]
 }
