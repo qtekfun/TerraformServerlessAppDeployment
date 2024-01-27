@@ -28,8 +28,22 @@ data "archive_file" "pymysql_layer_zip" {
   output_path = "pymysql_layer.zip"
 }
 
+data "archive_file" "boto3_layer_zip" {
+  type        = "zip"
+  source_dir  = "app/boto3_layer"
+  output_path = "boto3_layer.zip"
+}
+
 resource "aws_lambda_layer_version" "pymysql_layer" {
   layer_name          = "pymysql_layer"
+  filename            = data.archive_file.pymysql_layer_zip.output_path
+  compatible_runtimes = ["python3.12"]
+
+  source_code_hash = data.archive_file.pymysql_layer_zip.output_base64sha256
+}
+
+resource "aws_lambda_layer_version" "boto3_layer" {
+  layer_name          = "boto3_layer"
   filename            = data.archive_file.pymysql_layer_zip.output_path
   compatible_runtimes = ["python3.12"]
 
@@ -55,7 +69,8 @@ resource "aws_lambda_function" "serverless_app" {
   }
 
   layers = [
-    aws_lambda_layer_version.pymysql_layer.arn
+    aws_lambda_layer_version.pymysql_layer.arn,
+    aws_lambda_layer_version.boto3_layer.arn,
   ]
 }
 

@@ -2,6 +2,7 @@
 
 import json
 import pymysql
+import boto3
 import os
 
 import logging
