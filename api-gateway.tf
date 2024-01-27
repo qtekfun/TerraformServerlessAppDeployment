@@ -31,7 +31,3 @@ resource "aws_lambda_permission" "apigateway_invoke_lambda" {
 
   source_arn = "${aws_apigatewayv2_api.app_api.execution_arn}/*/*"
 }
-
-output "api_gateway_uri" {
-  value = "${aws_apigatewayv2_api.app_api.api_endpoint}/${aws_apigatewayv2_stage.lambda_stage.name}/"
-}
