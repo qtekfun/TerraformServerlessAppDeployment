@@ -7,4 +7,5 @@ resource "aws_db_instance" "my_db_instance" {
   password            = "mysecretpassword"
   db_name             = "mydatabase"
   publicly_accessible = true
+  skip_final_snapshot = true
 }
