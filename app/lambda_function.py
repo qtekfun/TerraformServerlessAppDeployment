@@ -45,8 +45,9 @@ def insert_ddbb(word):
     data = {"word" : {'S': word},
             "times": {'N': '1'}}
     existing_item = dynamodb.get_item(TableName=dynamodb_table_name, 
-                                      Key={'word': {'S': word}})
+                                      Key={'word': {'S': word}}).get('Item')
     print(f'existing_item is {existing_item}')
+
     if existing_item:
         dynamodb.update_item(
             TableName=dynamodb_table_name,
