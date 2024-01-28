@@ -42,6 +42,7 @@ resource "aws_lambda_function" "serverless_app" {
   handler          = "lambda_function.lambda_handler"
   filename         = "lambda_function.zip"
   role             = aws_iam_role.lambda_execution_role.arn
+  timeout          = 6
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
   environment {
