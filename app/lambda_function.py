@@ -24,11 +24,13 @@ def lambda_handler(event, context):
         parameter_value = 'unknown'
 
     insert_ddbb(parameter_value)
+    top10 = get_top_10()
 
     # Construct the response body including the parameter value
     response_body = f"Hello, I'm fine. Your env vars are {s3_bucket_name}.\n"
     response_body += f"The parameter you sent me was {parameter_value}\n"
-    response_body += f"event is {event}\n"
+    # response_body += f"event is {event}\n"
+    response_body += f"Top10 is {top10}"
     # response_body += f"{s3_url}"
 
     # Return the response with a 200 status code
@@ -57,6 +59,14 @@ def insert_ddbb(word):
         )
     else:
         dynamodb.put_item(TableName=dynamodb_table_name, Item=data)
+
+def get_top_10():
+    dynamodb = boto3.client('dynamodb')
+    response = dynamodb.scan(TableName=dynamodb_table_name)
+    items = response.get('Items', [])
+    items_sorted = sorted(items, key=lambda x: int(x['times']['N']), reverse=True)
+    top_10_elements = items_sorted[:10]
+    return top_10_elements
 
 def upload_to_s3():
 
