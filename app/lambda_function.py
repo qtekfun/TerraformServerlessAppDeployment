@@ -13,9 +13,6 @@ def lambda_handler(event, context):
 
     logging.info(f"Received event: {json.dumps(event)}")
 
-      
-    # s3_url = upload_to_s3()
-
     # Extract the parameter from the incoming JSON request
     try:
         request_body = json.loads(event['body'])
@@ -23,34 +20,37 @@ def lambda_handler(event, context):
     except json.JSONDecodeError:
         parameter_value = 'unknown'
 
+    # Return 201 if no parameter received
+    if parameter_value == 'unknown':
+        return {'statuscode': 201,
+                'body': 'Missing parameter in body'}
+
+    # Insert in dynamodb the parameter
     insert_ddbb(parameter_value)
+
+    # Get the top 10 most common words
     top10 = get_top_10()
 
-    # Construct the response body including the parameter value
-    response_body = f"Hello, I'm fine. Your env vars are {s3_bucket_name}.\n"
-    response_body += f"The parameter you sent me was {parameter_value}\n"
-    # response_body += f"event is {event}\n"
-    response_body += f"Top10 is {top10}"
-    # response_body += f"{s3_url}"
-
+    # fileName = create_temp_file(top10)
+    response = upload_to_s3(top10)
+    
     # Return the response with a 200 status code
     return {
         'statusCode': 200,
-        'body': response_body
+        'body': response
     }
 
 def insert_ddbb(word):
     dynamodb = boto3.client('dynamodb')
-    print(f'get table')
-    print(f'table name is {dynamodb_table_name}')
-    print(f'word is {word}')
     data = {"word" : {'S': word},
             "times": {'N': '1'}}
+    
+    # Check if the word already exists
     existing_item = dynamodb.get_item(TableName=dynamodb_table_name, 
                                       Key={'word': {'S': word}}).get('Item')
-    print(f'existing_item is {existing_item}')
 
     if existing_item:
+        # If exists, update counter
         dynamodb.update_item(
             TableName=dynamodb_table_name,
             Key={'word': {'S': word}},
@@ -58,6 +58,7 @@ def insert_ddbb(word):
             ExpressionAttributeValues={':inc': {'N': '1'}}
         )
     else:
+        # Include the new word
         dynamodb.put_item(TableName=dynamodb_table_name, Item=data)
 
 def get_top_10():
@@ -68,22 +69,26 @@ def get_top_10():
     top_10_elements = items_sorted[:10]
     return top_10_elements
 
-def upload_to_s3():
+def create_temp_file(json_content):
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    with open(temp_file.name, 'w') as file:
+        json.dump(json_content, file)
+    return temp_file.name
 
-    data = {"key": "value"}
+def upload_to_s3(text):
+    file_name = "top.json"
+    lambda_path = "/tmp/" + file_name
+    os.system(f'echo {text} >'+lambda_path)
+    s3 = boto3.resource("s3")
+    s3.meta.client.upload_file(lambda_path, s3_bucket_name, file_name)
 
-    print(f'data is {data}')
+    try:
+        response = s3.meta.client.generate_presigned_url('get_object',
+                                            Params={'Bucket': s3_bucket_name,
+                                                    'Key': file_name},
+                                            ExpiresIn=600)
+    except ClientError as e:
+        logging.error(e)
+        return None
 
-    s3 = boto3.client('s3')
-
-    print(f's3 client')
-
-    s3_key = 'top.json'
-
-    print(f's3 key is {s3_key}')
-
-    s3.put_object(Body=data, Bucket=s3_bucket_name, Key=s3_key)
-
-    print(f'file uploaded')
-
-    return ""
+    return response
