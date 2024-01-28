@@ -47,7 +47,7 @@ resource "aws_lambda_function" "serverless_app" {
 
   environment {
     variables = {
-      S3_BUCKET_NAME = aws_s3_bucket.app-serverless-s3-bucket.bucket
+      S3_BUCKET_NAME = aws_s3_bucket.app_serverless_s3_bucket.bucket
       DYNAMODB_TABLE = aws_dynamodb_table.dynamodb_table.name
     }
   }
