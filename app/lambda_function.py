@@ -81,11 +81,11 @@ def upload_to_s3(text):
     lambda_path = "/tmp/" + file_name
     with open(lambda_path, 'w') as f:
         json.dump(text, f)
-    s3 = boto3.resource("s3")
-    s3.meta.client.upload_file(lambda_path, s3_bucket_name, file_name)
+    s3 = boto3.client("s3")
+    s3.upload_file(lambda_path, s3_bucket_name, file_name)
 
     try:
-        response = s3.meta.client.generate_presigned_url('get_object',
+        response = s3.generate_presigned_url('get_object',
                                             Params={'Bucket': s3_bucket_name,
                                                     'Key': file_name},
                                             ExpiresIn=600)
