@@ -67,7 +67,8 @@ def get_top_10():
     items = response.get('Items', [])
     items_sorted = sorted(items, key=lambda x: int(x['times']['N']), reverse=True)
     top_10_elements = items_sorted[:10]
-    return top_10_elements
+    combined_json = {'top10words': top_10_elements} 
+    return combined_json
 
 def create_temp_file(json_content):
     temp_file = tempfile.NamedTemporaryFile(delete=False)
@@ -78,7 +79,8 @@ def create_temp_file(json_content):
 def upload_to_s3(text):
     file_name = "top.json"
     lambda_path = "/tmp/" + file_name
-    os.system(f'echo {text} >'+lambda_path)
+    with open(lambda_path, 'w') as f:
+        json.dump(text, f)
     s3 = boto3.resource("s3")
     s3.meta.client.upload_file(lambda_path, s3_bucket_name, file_name)
 
