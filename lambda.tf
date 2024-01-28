@@ -47,7 +47,7 @@ resource "aws_lambda_function" "serverless_app" {
 
   environment {
     variables = {
-      S3_BUCKET_NAME = aws_s3_bucket.app_s3_bucketa.bucket
+      S3_BUCKET_NAME = aws_s3_bucket.app-serverless-s3-bucket.bucket
       DYNAMODB_TABLE = aws_dynamodb_table.dynamodb_table.name
     }
   }
@@ -68,9 +68,9 @@ resource "aws_iam_role_policy_attachment" "serverless_app_log_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy_attachment" "s3_write_attachment" {
+resource "aws_iam_role_policy_attachment" "s3_policy_document" {
   role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = aws_iam_policy.s3_write_attachment_policy.arn
+  policy_arn = aws_iam_policy.s3_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "access_dynamodb" {

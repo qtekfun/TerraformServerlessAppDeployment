@@ -1,8 +1,8 @@
-resource "aws_s3_bucket" "app_s3_bucketa" {
-  bucket = "app-s3-bucketa"
+resource "aws_s3_bucket" "app-serverless-s3-bucket" {
+  bucket = "app-serverless-s3-bucket"
 }
 
-data "aws_iam_policy_document" "s3_write_attachment" {
+data "aws_iam_policy_document" "s3_policy_document" {
   statement {
     effect = "Allow"
     actions = [
@@ -12,11 +12,11 @@ data "aws_iam_policy_document" "s3_write_attachment" {
       "s3:PutObject",
       "s3:PutObjectAcl"
     ]
-    resources = ["*"]
+    resources = ["arn:aws:s3:::app-serverless-s3-bucket", "arn:aws:s3:::app-serverless-s3-bucket/*"]
   }
 }
 
-resource "aws_iam_policy" "s3_write_attachment_policy" {
-  name   = "s3_write_attachment_policy"
-  policy = data.aws_iam_policy_document.s3_write_attachment.json
+resource "aws_iam_policy" "s3_policy" {
+  name   = "s3_policy"
+  policy = data.aws_iam_policy_document.s3_policy_document.json
 }
