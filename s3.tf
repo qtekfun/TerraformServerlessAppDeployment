@@ -4,8 +4,11 @@ resource "aws_s3_bucket" "app_s3_bucketa" {
 
 data "aws_iam_policy_document" "s3_write_attachment" {
   statement {
-    effect    = "Allow"
-    actions   = ["s3:*"]
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:PutObjectAcl"
+    ]
     resources = ["*"]
   }
 }
