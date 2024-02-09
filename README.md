@@ -67,7 +67,7 @@ To test this app you will need to follow this steps:
 Just make a curl request to the uri provided by terraform apply. For example:
 
 ``` bash
-curl -X POST -H "Content-Type: application/json" -d '{"parameter": "hola"}' $(terraform output -raw api_gateway_uri)
+curl -X POST -H "Content-Type: application/json" -d '{"parameter": "hola"}' $(terraform output -raw public_uri)
 ```
 
 In that command, the uri is directly got from the output of terraform apply and as an example "hola" is used as a parameter.
