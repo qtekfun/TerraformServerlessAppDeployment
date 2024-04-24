@@ -1,4 +1,4 @@
-# Serverless App
+# Terraform Serverless App Deployment
 
 ## Architecture
 
