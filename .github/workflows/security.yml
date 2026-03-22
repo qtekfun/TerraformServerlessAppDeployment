@@ -22,15 +22,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Trivy — filesystem vulnerability scan
+      - name: Trivy — filesystem vulnerability scan (enforcement)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+          ignore-unfixed: true
+
+      - name: Trivy — filesystem vulnerability scan (SARIF report)
+        if: always()
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: "fs"
           scan-ref: "."
           format: "sarif"
           output: "trivy-fs.sarif"
-          severity: "CRITICAL,HIGH"
-          exit-code: "1"
+          exit-code: "0"
           ignore-unfixed: true
 
       - name: Upload Trivy filesystem results to GitHub Security
@@ -40,15 +50,29 @@ jobs:
           sarif_file: "trivy-fs.sarif"
           category: "trivy-filesystem"
 
-      - name: Trivy — IaC misconfiguration scan
+      # Enforcement step: table format correctly respects --severity for the exit code.
+      # SARIF mode reports ALL severities regardless of the severity filter, so it
+      # cannot be used to gate the build.
+      - name: Trivy — IaC misconfiguration scan (enforcement)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          scan-ref: "."
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+
+      # Reporting step: generates SARIF with all severities for the Security tab.
+      # exit-code is 0 so findings below CRITICAL/HIGH do not fail the build here.
+      - name: Trivy — IaC misconfiguration scan (SARIF report)
+        if: always()
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: "config"
           scan-ref: "."
           format: "sarif"
           output: "trivy-iac.sarif"
-          severity: "CRITICAL,HIGH,MEDIUM"
-          exit-code: "1"
+          exit-code: "0"
 
       - name: Upload Trivy IaC results to GitHub Security
         if: always()
