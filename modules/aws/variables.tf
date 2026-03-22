@@ -27,3 +27,10 @@ variable "enable_s3_versioning" {
   description = "Enable versioning on the S3 reports bucket. Allows point-in-time recovery of report objects."
   default     = false
 }
+
+variable "api_key" {
+  type        = string
+  sensitive   = true
+  description = "API key required in the x-api-key request header. Leave empty to keep the endpoint public."
+  default     = ""
+}

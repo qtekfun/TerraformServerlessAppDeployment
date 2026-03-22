@@ -37,11 +37,12 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 }
 
 resource "aws_apigatewayv2_route" "lambda_route" {
-  #checkov:skip=CKV_AWS_309: This is a public API by design. Authentication (API key or JWT authorizer) is listed as a future roadmap item in the README.
-  api_id    = aws_apigatewayv2_api.app_api.id
-  route_key = "POST /"
-
-  target = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  #checkov:skip=CKV_AWS_309: Public by default. Set var.api_key to enable a Lambda REQUEST authorizer that validates the x-api-key header.
+  api_id             = aws_apigatewayv2_api.app_api.id
+  route_key          = "POST /"
+  target             = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  authorization_type = local.auth_enabled ? "CUSTOM" : "NONE"
+  authorizer_id      = local.auth_enabled ? aws_apigatewayv2_authorizer.api_key_auth[0].id : null
 }
 
 resource "aws_lambda_permission" "apigateway_invoke_lambda" {
