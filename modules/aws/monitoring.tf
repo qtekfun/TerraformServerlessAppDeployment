@@ -3,8 +3,10 @@ locals {
 }
 
 resource "aws_sns_topic" "alerts" {
-  count = local.sns_enabled ? 1 : 0
-  name  = "serverless-app-alerts"
+  #checkov:skip=CKV_AWS_26: Using AWS-managed key (alias/aws/sns) is sufficient; a CMK adds operational overhead without meaningful benefit for alarm notifications.
+  count             = local.sns_enabled ? 1 : 0
+  name              = "serverless-app-alerts"
+  kms_master_key_id = "alias/aws/sns"
 }
 
 resource "aws_sns_topic_subscription" "email_alert" {

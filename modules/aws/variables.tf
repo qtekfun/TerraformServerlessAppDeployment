@@ -6,8 +6,8 @@ variable "presigned_url_expiry" {
 
 variable "log_retention_days" {
   type        = number
-  description = "CloudWatch log group retention period in days"
-  default     = 30
+  description = "CloudWatch log group retention period in days (minimum 365 to satisfy CKV_AWS_338)"
+  default     = 365
 }
 
 variable "alert_email" {

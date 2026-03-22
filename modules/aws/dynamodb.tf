@@ -1,4 +1,5 @@
 resource "aws_dynamodb_table" "dynamodb_table" {
+  #checkov:skip=CKV_AWS_119: AWS-managed SSE is explicitly enabled. A CMK adds key-management overhead that is not justified for this workload.
   name         = "app-serverless-ddb-table"
   hash_key     = "word"
   billing_mode = "PAY_PER_REQUEST"

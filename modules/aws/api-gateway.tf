@@ -4,6 +4,7 @@ resource "aws_apigatewayv2_api" "app_api" {
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_log_group" {
+  #checkov:skip=CKV_AWS_158: AWS-managed encryption is applied to CloudWatch Logs by default. A KMS CMK adds key-management overhead that is not justified for access logs.
   name              = "/aws/apigateway/${aws_apigatewayv2_api.app_api.id}"
   retention_in_days = var.log_retention_days
 }
@@ -36,6 +37,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 }
 
 resource "aws_apigatewayv2_route" "lambda_route" {
+  #checkov:skip=CKV_AWS_309: This is a public API by design. Authentication (API key or JWT authorizer) is listed as a future roadmap item in the README.
   api_id    = aws_apigatewayv2_api.app_api.id
   route_key = "POST /"
 
