@@ -47,8 +47,9 @@ resource "aws_lambda_function" "serverless_app" {
 
   environment {
     variables = {
-      S3_BUCKET_NAME = aws_s3_bucket.app_serverless_s3_bucket.bucket
-      DYNAMODB_TABLE = aws_dynamodb_table.dynamodb_table.name
+      S3_BUCKET_NAME       = aws_s3_bucket.app_serverless_s3_bucket.bucket
+      DYNAMODB_TABLE       = aws_dynamodb_table.dynamodb_table.name
+      PRESIGNED_URL_EXPIRY = tostring(var.presigned_url_expiry)
     }
   }
 
@@ -60,7 +61,7 @@ resource "aws_lambda_function" "serverless_app" {
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name = "/aws/lambda/${aws_lambda_function.serverless_app.function_name}"
 
-  retention_in_days = 30
+  retention_in_days = var.log_retention_days
 }
 
 resource "aws_iam_role_policy_attachment" "serverless_app_log_policy" {
