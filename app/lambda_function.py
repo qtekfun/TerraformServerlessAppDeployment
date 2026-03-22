@@ -1,6 +1,6 @@
 # lambda_function.py
 
-import json, re, boto3, os, logging
+import json, re, tempfile, boto3, os, logging
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
@@ -83,7 +83,7 @@ def get_top_10():
 
 def upload_to_s3(text):
     file_name = "top.json"
-    lambda_path = "/tmp/" + file_name
+    lambda_path = os.path.join(tempfile.gettempdir(), file_name)
     with open(lambda_path, 'w') as f:
         json.dump(text, f)
     s3 = boto3.client("s3")
