@@ -15,3 +15,9 @@ variable "alert_email" {
   description = "Email address for CloudWatch alarm notifications. Leave empty to disable SNS alerts."
   default     = ""
 }
+
+variable "monthly_cost_budget_usd" {
+  type        = string
+  description = "Monthly AWS cost budget in USD. An alert is sent at 80% actual and 100% forecasted."
+  default     = "10"
+}
