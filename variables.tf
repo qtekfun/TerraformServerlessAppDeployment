@@ -27,3 +27,9 @@ variable "monthly_cost_budget_usd" {
   description = "Monthly AWS cost budget in USD. An alert is sent at 80% actual and 100% forecasted."
   default     = "10"
 }
+
+variable "enable_s3_versioning" {
+  type        = bool
+  description = "Enable versioning on the S3 reports bucket. Allows point-in-time recovery of report objects."
+  default     = false
+}

@@ -27,6 +27,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_encryption" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "bucket_versioning" {
+  bucket = aws_s3_bucket.app_serverless_s3_bucket.id
+
+  versioning_configuration {
+    status = var.enable_s3_versioning ? "Enabled" : "Suspended"
+  }
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
   bucket = aws_s3_bucket.app_serverless_s3_bucket.id
 
