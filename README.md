@@ -80,13 +80,32 @@ terraform apply        # confirm with "yes" when prompted
 |---|---|---|
 | `aws_region` | `eu-west-3` | AWS region for all resources |
 | `presigned_url_expiry` | `600` | Presigned URL TTL in seconds |
-| `log_retention_days` | `30` | CloudWatch log retention |
-| `alert_email` | `""` | Email for alarm notifications (leave empty to disable) |
+| `log_retention_days` | `365` | CloudWatch log retention in days |
+| `alert_email` | `""` | Email for CloudWatch + cost anomaly alerts (leave empty to disable) |
+| `monthly_cost_budget_usd` | `"10"` | Monthly cost budget threshold in USD |
+| `api_key` | `""` | API key for `x-api-key` header auth (leave empty for public endpoint) |
+| `enable_s3_versioning` | `false` | Enable S3 versioning on the reports bucket |
 
-Example with alert email:
+Example with all optional features:
 
 ```bash
-terraform apply -var="alert_email=you@example.com"
+terraform apply \
+  -var="alert_email=you@example.com" \
+  -var="monthly_cost_budget_usd=5" \
+  -var="api_key=my-secret-key" \
+  -var="enable_s3_versioning=true"
+```
+
+### Authenticated requests
+
+When `api_key` is set, every request must include the `x-api-key` header:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: my-secret-key" \
+  -d '{"parameter": "hello world"}' \
+  $(terraform output -raw public_uri)
 ```
 
 ---
@@ -131,6 +150,44 @@ python -m unittest discover -s tests -v
 
 ---
 
+## Remote state (team use)
+
+Run the bootstrap once to create the S3 + DynamoDB backend, then migrate:
+
+```bash
+cd bootstrap
+terraform init
+terraform apply -var="state_bucket_name=<globally-unique-bucket-name>"
+
+# Back in the repo root:
+cp backend.tf.example backend.tf
+# Edit backend.tf — replace <state_bucket_name> with the output value
+terraform init   # Terraform will offer to migrate local state to S3
+```
+
+## Canary deployments
+
+The Lambda function publishes a new immutable version on every `terraform apply`. Traffic is served via the `live` alias. To do a staged rollout before fully cutting over, update the alias routing config:
+
+```hcl
+# In modules/aws/lambda.tf — temporarily add routing_config to the alias:
+resource "aws_lambda_alias" "live" {
+  name             = "live"
+  function_name    = aws_lambda_function.serverless_app.function_name
+  function_version = aws_lambda_function.serverless_app.version   # new version
+
+  routing_config {
+    additional_version_weights = {
+      "<previous_version_number>" = 0.9   # 90% to old, 10% to new
+    }
+  }
+}
+```
+
+Once confident, remove `routing_config` and `terraform apply` to send 100% of traffic to the new version.
+
+---
+
 ## Tear down
 
 ```bash
@@ -153,8 +210,8 @@ terraform destroy
 * [x] Input validation — empty, whitespace-only, and >10 000-character inputs rejected with HTTP 400
 * [x] Configurable presigned URL expiry — via `presigned_url_expiry` Terraform variable
 * [x] Unit tests — 12 tests covering all Lambda handlers and helpers
-* [ ] Configure alerting for costs — set up AWS Budgets or Cost Anomaly Detection in the console
-* [ ] Canary / staged deployments — evaluate AWS Lambda aliases + weighted routing on API Gateway
-* [ ] S3 versioning — evaluate if point-in-time recovery of reports is needed
-* [ ] Authentication — add an API key or JWT authorizer to the API Gateway route
-* [ ] Terraform remote state — store state in S3 + DynamoDB lock for team use
+* [x] Configure alerting for costs — AWS Budgets (80%/100% thresholds) + Cost Anomaly Detection via `monthly_cost_budget_usd` and `alert_email`
+* [x] Canary / staged deployments — Lambda publishes versions on every deploy; `live` alias enables weighted routing via `routing_config`
+* [x] S3 versioning — opt-in via `enable_s3_versioning = true`
+* [x] Authentication — optional Lambda REQUEST authorizer validating `x-api-key` header; enabled by setting `api_key`
+* [x] Terraform remote state — `bootstrap/` provisions S3 + DynamoDB backend; `backend.tf.example` documents migration steps
