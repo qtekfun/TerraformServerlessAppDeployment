@@ -32,7 +32,7 @@ resource "aws_apigatewayv2_stage" "lambda_stage" {
 resource "aws_apigatewayv2_integration" "lambda_integration" {
   api_id             = aws_apigatewayv2_api.app_api.id
   integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.serverless_app.invoke_arn
+  integration_uri    = aws_lambda_alias.live.invoke_arn
   integration_method = "POST"
 }
 
@@ -48,6 +48,7 @@ resource "aws_lambda_permission" "apigateway_invoke_lambda" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.serverless_app.function_name
+  qualifier     = aws_lambda_alias.live.name
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_apigatewayv2_api.app_api.execution_arn}/*/*"

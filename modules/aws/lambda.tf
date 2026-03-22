@@ -48,6 +48,7 @@ resource "aws_lambda_function" "serverless_app" {
   filename         = "lambda_function.zip"
   role             = aws_iam_role.lambda_execution_role.arn
   timeout          = 6
+  publish          = true
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
   environment {
@@ -65,6 +66,16 @@ resource "aws_lambda_function" "serverless_app" {
   tracing_config {
     mode = "Active"
   }
+}
+
+# Stable alias pointing to the currently deployed version.
+# To run a canary deployment, update routing_config to split traffic between
+# this version and the previous one before fully cutting over:
+#   routing_config { additional_version_weights = { "<prev_version>" = 0.9 } }
+resource "aws_lambda_alias" "live" {
+  name             = "live"
+  function_name    = aws_lambda_function.serverless_app.function_name
+  function_version = aws_lambda_function.serverless_app.version
 }
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
