@@ -1,0 +1,20 @@
+# AVD-AWS-0017: CloudWatch log groups not encrypted with a customer-managed KMS key.
+# AWS-managed encryption is enabled by default and is sufficient for this workload.
+# A CMK would add operational overhead (key rotation, IAM policies) with no meaningful
+# security benefit for transient application logs.
+AVD-AWS-0017
+
+# AVD-AWS-0025: DynamoDB table not encrypted with a customer-managed KMS key.
+# AWS-managed SSE is explicitly enabled (server_side_encryption.enabled = true).
+# A CMK is not required for this workload's threat model.
+AVD-AWS-0025
+
+# AVD-AWS-0090: S3 bucket versioning not enabled.
+# Reports are deterministically regenerated on every request; versioning adds S3 storage
+# cost without providing recovery value. Tracked for future evaluation in the README.
+AVD-AWS-0090
+
+# AVD-AWS-0132: S3 bucket access logging not enabled.
+# Object access is gated exclusively via short-lived presigned URLs; S3 server-access logs
+# are not required. Can be enabled when access auditing becomes a requirement.
+AVD-AWS-0132

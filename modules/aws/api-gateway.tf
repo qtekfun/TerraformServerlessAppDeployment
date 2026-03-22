@@ -3,10 +3,29 @@ resource "aws_apigatewayv2_api" "app_api" {
   protocol_type = "HTTP"
 }
 
+resource "aws_cloudwatch_log_group" "api_gateway_log_group" {
+  name              = "/aws/apigateway/${aws_apigatewayv2_api.app_api.id}"
+  retention_in_days = var.log_retention_days
+}
+
 resource "aws_apigatewayv2_stage" "lambda_stage" {
   api_id      = aws_apigatewayv2_api.app_api.id
   name        = "prod"
   auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway_log_group.arn
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      sourceIp       = "$context.identity.sourceIp"
+      httpMethod     = "$context.httpMethod"
+      routeKey       = "$context.routeKey"
+      status         = "$context.status"
+      responseLength = "$context.responseLength"
+      durationMs     = "$context.responseLatency"
+      errorMessage   = "$context.error.message"
+    })
+  }
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {

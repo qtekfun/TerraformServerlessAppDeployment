@@ -56,6 +56,10 @@ resource "aws_lambda_function" "serverless_app" {
   layers = [
     aws_lambda_layer_version.boto3_layer.arn,
   ]
+
+  tracing_config {
+    mode = "Active"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
@@ -67,6 +71,11 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
 resource "aws_iam_role_policy_attachment" "serverless_app_log_policy" {
   role       = aws_iam_role.lambda_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "xray_policy" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "s3_policy_document" {
