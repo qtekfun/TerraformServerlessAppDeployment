@@ -1,12 +1,15 @@
 resource "aws_dynamodb_table" "dynamodb_table" {
-  name           = "app-serverless-ddb-table"
-  hash_key       = "word"
-  read_capacity  = 5
-  write_capacity = 5
+  name         = "app-serverless-ddb-table"
+  hash_key     = "word"
+  billing_mode = "PAY_PER_REQUEST"
 
   attribute {
     name = "word"
     type = "S"
+  }
+
+  server_side_encryption {
+    enabled = true
   }
 }
 
