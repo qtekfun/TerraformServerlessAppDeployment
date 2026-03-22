@@ -101,9 +101,10 @@ terraform apply \
 When `api_key` is set, every request must include the `x-api-key` header:
 
 ```bash
+API_KEY="$(terraform output -raw api_key)"   # or set manually
 curl -X POST \
   -H "Content-Type: application/json" \
-  -H "x-api-key: my-secret-key" \
+  -H "x-api-key: ${API_KEY}" \
   -d '{"parameter": "hello world"}' \
   $(terraform output -raw public_uri)
 ```

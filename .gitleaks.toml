@@ -1,0 +1,12 @@
+title = "Gitleaks configuration"
+
+[extend]
+# Extend the default Gitleaks ruleset
+useDefault = true
+
+[allowlist]
+description = "Allowlist for documentation placeholders and example code"
+paths = [
+  # Markdown docs may contain example curl commands with placeholder headers
+  '''^README\.md$''',
+]
