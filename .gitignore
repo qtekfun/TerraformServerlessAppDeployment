@@ -1,4 +1,4 @@
 *.tfstate*
-*.hcl
+.terraform.lock.hcl
 .terraform
 *.zip
