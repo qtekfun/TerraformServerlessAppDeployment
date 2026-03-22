@@ -1,0 +1,25 @@
+# Remote state configuration for team use.
+#
+# Prerequisites (one-time setup):
+#   cd bootstrap
+#   terraform init
+#   terraform apply -var="state_bucket_name=<globally-unique-name>"
+#
+# Then:
+#   1. Copy this file to backend.tf in the repository root.
+#   2. Replace <state_bucket_name> with the bucket name from the bootstrap output.
+#   3. Run:  terraform init
+#      Terraform will prompt to migrate existing local state to S3 — answer "yes".
+#
+# After migration, the state file is stored in S3 with server-side encryption and
+# all concurrent applies are serialised via the DynamoDB lock table.
+
+terraform {
+  backend "s3" {
+    bucket         = "<state_bucket_name>"
+    key            = "TerraformServerlessAppDeployment/terraform.tfstate"
+    region         = "eu-west-3"
+    dynamodb_table = "terraform-state-lock"
+    encrypt        = true
+  }
+}
