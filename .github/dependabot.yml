@@ -11,9 +11,19 @@ updates:
       - "dependencies"
       - "github-actions"
 
-  # Keep the Terraform AWS provider up to date
+  # Root module: required_providers block lives here
   - package-ecosystem: "terraform"
     directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "terraform"
+
+  # Child module: also has its own required_providers block
+  - package-ecosystem: "terraform"
+    directory: "/modules/aws"
     schedule:
       interval: "weekly"
       day: "monday"
