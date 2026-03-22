@@ -1,6 +1,7 @@
 # lambda_function.py
 
 import json, tempfile, boto3, os, logging
+from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -20,10 +21,10 @@ def lambda_handler(event, context):
     except json.JSONDecodeError:
         parameter_value = 'unknown'
 
-    # Return 201 if no parameter received
+    # Return 400 if no parameter received
     if parameter_value == 'unknown':
-        return {'statuscode': 201,
-                'body': 'Missing parameter in body'}
+        return {'statusCode': 400,
+                'body': json.dumps({'error': 'Missing parameter in body'})}
 
     # Insert in dynamodb the parameter
     insert_ddbb(parameter_value)
@@ -37,7 +38,7 @@ def lambda_handler(event, context):
     # Return the response with a 200 status code
     return {
         'statusCode': 200,
-        'body': response
+        'body': json.dumps({'url': response})
     }
 
 def insert_ddbb(word):
