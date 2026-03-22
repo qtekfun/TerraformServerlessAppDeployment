@@ -22,14 +22,14 @@ resource "aws_lambda_function" "authorizer" {
   #checkov:skip=CKV_AWS_116: DLQ not applicable; authorizer is invoked synchronously by API Gateway.
   #checkov:skip=CKV_AWS_173: API_KEY should ideally be stored in Secrets Manager for production; env var is acceptable for this workload.
   #checkov:skip=CKV_AWS_115: Reserved concurrency not set; authorizer scales with API traffic.
-  count         = local.auth_enabled ? 1 : 0
-  function_name = "serverless_app_authorizer"
-  runtime       = "python3.12"
-  handler       = "authorizer.handler"
-  filename      = data.archive_file.authorizer[0].output_path
-  role          = aws_iam_role.lambda_execution_role.arn
-  timeout       = 5
-  publish       = true
+  count            = local.auth_enabled ? 1 : 0
+  function_name    = "serverless_app_authorizer"
+  runtime          = "python3.12"
+  handler          = "authorizer.handler"
+  filename         = data.archive_file.authorizer[0].output_path
+  role             = aws_iam_role.lambda_execution_role.arn
+  timeout          = 5
+  publish          = true
   source_code_hash = data.archive_file.authorizer[0].output_base64sha256
 
   environment {
