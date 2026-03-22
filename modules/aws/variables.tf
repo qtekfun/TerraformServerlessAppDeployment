@@ -1,9 +1,3 @@
-variable "aws_region" {
-  type        = string
-  description = "AWS region for all resources"
-  default     = "eu-west-3"
-}
-
 variable "presigned_url_expiry" {
   type        = number
   description = "Expiry time in seconds for the S3 presigned URL"
