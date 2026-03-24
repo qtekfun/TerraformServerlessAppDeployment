@@ -6,7 +6,14 @@ useDefault = true
 
 [allowlist]
 description = "Allowlist for documentation placeholders and example code"
+commits = [
+  # rds.tf had a placeholder password in this commit; file was removed in a subsequent commit
+  "acf5248a6a9cb9ea704d158af25e2e38d0003d2a",
+]
 paths = [
   # Markdown docs may contain example curl commands with placeholder headers
   '''^README\.md$''',
+  # Vendored AWS SDK (botocore) — example JSON files and source use token-like field names
+  # that trigger generic-api-key; none are real secrets
+  '''^app/boto3_layer/''',
 ]
